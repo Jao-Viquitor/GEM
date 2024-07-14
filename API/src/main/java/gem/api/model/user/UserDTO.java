@@ -28,4 +28,13 @@ public record UserDTO (
     public UserDTO(User user) {
        this(user.getId(), user.getUsername(), user.getEmail(), user.getPhone(), user.getType(), user.getNivel());
     }
+
+    public UserDTO(Long id, String username, String email, String phone, UserType type, Nivel nivel) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.phone = phone;
+        this.type = type;
+        this.nivel = nivel;
+    }
 }

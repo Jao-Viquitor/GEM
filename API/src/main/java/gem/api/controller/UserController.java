@@ -8,8 +8,10 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/user")
@@ -23,25 +25,29 @@ public class UserController {
 
     @PostMapping
     @Transactional
-    public void createUser(@Valid @RequestBody UserCreateDTO json){
-        service.saveUser(json);
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateDTO json, UriComponentsBuilder uriBuilder){
+        var user = service.saveUser(json);
+        var uri = uriBuilder.path("api/user/{id}").buildAndExpand(user.getId()).toUri();
+        return ResponseEntity.created(uri).body(new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getPhone(), user.getType(), user.getNivel()));
     }
 
     @GetMapping
-    public Page<UserDTO> getAllUsers(@PageableDefault(sort = {"username"}) Pageable pag){
-        return service.getAllUsers(pag);
+    public ResponseEntity<Page<UserDTO>> getAllUsers(@PageableDefault(sort = {"username"}) Pageable pag){
+        return ResponseEntity.ok(service.getAllUsers(pag));
     }
 
     @PutMapping
     @Transactional
-    public void updateUser(@Valid @RequestBody UserUpdateDTO json){
+    public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserUpdateDTO json){
         service.updateUser(json);
+        return ResponseEntity.ok(new UserDTO(json.id(), json.username(), json.email(), json.phone(), json.type(), json.nivel()));
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public void deleteUser(@PathVariable Long id){
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
         service.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

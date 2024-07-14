@@ -18,8 +18,9 @@ public class UserService {
         this.repository = repository;
     }
 
-    public void saveUser(UserCreateDTO json) {
-        repository.save(new User(json));
+    public User saveUser(UserCreateDTO json) {
+        var data = new UserCreateDTO(json.username(), json.password(), json.email(), json.phone(), json.type(), json.nivel());
+        return repository.save(new User(data));
     }
 
     public Page<UserDTO> getAllUsers(Pageable pag) {
@@ -27,8 +28,8 @@ public class UserService {
     }
 
     public void updateUser(UserUpdateDTO json) {
-        var medico = repository.getReferenceById(json.id());
-        medico.updateInfo(json);
+        User user = repository.getReferenceById(json.id());
+        user.updateInfo(json);
     }
 
     public void deleteUser(Long id) {
