@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -23,31 +24,32 @@ public class UserController {
         this.service = service;
     }
 
-    @PostMapping
-    @Transactional
-    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateDTO json, UriComponentsBuilder uriBuilder){
-        var user = service.saveUser(json);
-        var uri = uriBuilder.path("api/user/{id}").buildAndExpand(user.getId()).toUri();
-        return ResponseEntity.created(uri).body(new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getPhone(), user.getType(), user.getNivel()));
+    @GetMapping
+    public ResponseEntity<Page<UserDTO>> index(@PageableDefault(sort = {"username"}) Pageable pag){
+        return service.getAllUsers(pag);
     }
 
-    @GetMapping
-    public ResponseEntity<Page<UserDTO>> getAllUsers(@PageableDefault(sort = {"username"}) Pageable pag){
-        return ResponseEntity.ok(service.getAllUsers(pag));
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> show(@PathVariable Long id){
+        return service.getUserById(id);
+    }
+
+    @PostMapping
+    @Transactional
+    public ResponseEntity<UserDTO> store(@Valid @RequestBody UserCreateDTO json, UriComponentsBuilder uriBuilder){
+        return service.saveUser(json, uriBuilder);
     }
 
     @PutMapping
     @Transactional
-    public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserUpdateDTO json){
-        service.updateUser(json);
-        return ResponseEntity.ok(new UserDTO(json.id(), json.username(), json.email(), json.phone(), json.type(), json.nivel()));
+    public ResponseEntity<UserDTO> update(@Valid @RequestBody UserUpdateDTO json){
+        return service.updateUser(json);
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
-        service.deleteUser(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> destroy(@PathVariable Long id){
+        return service.deleteUser(id);
     }
 
 }
